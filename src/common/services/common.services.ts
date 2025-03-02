@@ -1,11 +1,9 @@
 import { HttpException } from '@nestjs/common';
 import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { OperationService } from './trace.service';
-import { Logger } from '../helpers/logger.handler';
 import { ResponseDto } from '../dtos/response.dto';
 
 export class CommonService<T> {
-  logger = new Logger(CommonService.name);
   protected readonly entityManager: EntityManager;
   constructor(
     entityManager: EntityManager,
@@ -16,7 +14,6 @@ export class CommonService<T> {
 
   private setTrace() {
     const trace: string = OperationService.getTrace();
-    this.logger.setRequestTrace(trace);
     return trace;
   }
 
