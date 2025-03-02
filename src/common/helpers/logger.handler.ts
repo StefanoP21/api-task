@@ -15,8 +15,9 @@ export class Logger extends ConsoleLogger {
   }
 
   private formatLogMessage(message: string): string {
+    const path = this.requestPath || 'no path';
     return this.requestTrace
-      ? `${this.requestPath} - [${this.requestTrace}] - ${message}`
+      ? `${path} - [${this.requestTrace}] - ${message}`
       : `${message}`;
   }
 
@@ -36,10 +37,10 @@ export class Logger extends ConsoleLogger {
   }
 
   catchLogger(status: number, response: any, message: string) {
-    const path = response.req.url;
-    const method = response.req.method;
+    const path = response.req ? response.req.url : 'no path';
+    const method = response.req ? response.req.method : 'no method';
     const user = response.payload ? response.payload.email : 'no user';
-    this.error(`[${method} ${path}] - [${user}] - [${status}] - ${message}`);
+    this.error(`[${method}: ${path}] - [${user}] - [${status}] - ${message}`);
   }
 
   log(message: string) {
