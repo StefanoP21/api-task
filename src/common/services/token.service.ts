@@ -1,5 +1,4 @@
 import * as bcryptjs from 'bcryptjs';
-import { v4 } from 'uuid';
 import jwt from 'jwt-simple';
 
 export class TokenService {
@@ -12,10 +11,6 @@ export class TokenService {
     passwordCipher: string,
   ): Promise<boolean> {
     return await bcryptjs.compare(password, passwordCipher);
-  }
-
-  static generateRefreshToken(): string {
-    return v4();
   }
 
   static validateAccessToken(

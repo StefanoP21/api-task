@@ -40,13 +40,9 @@ export class AuthService {
       }
 
       dto.password = await TokenService.cryptPassword(dto.password);
-      dto.refreshToken = TokenService.generateRefreshToken();
-      const newUser = new User(dto);
-      await this.userRepository.save(newUser);
+      await this.userRepository.save(new User(dto));
       const data = {
-        name: dto.name,
         email: dto.email,
-        refreshToken: newUser.refreshToken,
       };
       return ResponseDto.format(trace, data);
     } catch (err) {
@@ -85,12 +81,10 @@ export class AuthService {
         expiresIn: this.configService.get('TOKEN_TIMEOUT'),
         secret: this.configService.get('TOKEN_KEYWORD'),
       });
-      user.refreshToken = TokenService.generateRefreshToken();
       await this.userRepository.save(user);
       const data = {
         email: user.email,
         accessToken,
-        refreshToken: user.refreshToken,
       };
       return ResponseDto.format(trace, data);
     } catch (err) {
