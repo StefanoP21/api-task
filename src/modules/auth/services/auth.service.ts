@@ -44,14 +44,14 @@ export class AuthService {
       );
       const userDb = await this.userRepository.save(new User(registerDto));
       const payload = { id: userDb.id, email: registerDto.email };
-      const accessToken = this.jwtService.sign(payload, {
-        expiresIn: this.configService.get('TOKEN_TIMEOUT'),
-        secret: this.configService.get('TOKEN_KEYWORD'),
+      const token = this.jwtService.sign(payload, {
+        expiresIn: this.configService.get('JWT_TIMEOUT'),
+        secret: this.configService.get('JWT_SECRET'),
       });
       const data = {
         id: userDb.id,
         email: registerDto.email,
-        accessToken,
+        token,
       };
       return ResponseDto.format(trace, data);
     } catch (err) {
@@ -86,15 +86,15 @@ export class AuthService {
       }
 
       const payload = { id: user.id, email: loginDto.email };
-      const accessToken = this.jwtService.sign(payload, {
-        expiresIn: this.configService.get('TOKEN_TIMEOUT'),
-        secret: this.configService.get('TOKEN_KEYWORD'),
+      const token = this.jwtService.sign(payload, {
+        expiresIn: this.configService.get('JWT_TIMEOUT'),
+        secret: this.configService.get('JWT_SECRET'),
       });
       await this.userRepository.save(user);
       const data = {
         id: user.id,
         email: user.email,
-        accessToken,
+        token,
       };
       return ResponseDto.format(trace, data);
     } catch (err) {

@@ -13,13 +13,27 @@ import { TaskService } from '../services/task.service';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { UpdateTaskDto } from '../dto/update-task.dto';
 import { AuthenticationGuard } from '../../../common/guards/authentication.guard';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
 
+@ApiTags('Task')
+@ApiBearerAuth('access-token')
 @Controller('task')
 @UseGuards(AuthenticationGuard)
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create a new task' })
+  @ApiResponse({ status: 201, description: 'Task created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiBody({ type: CreateTaskDto })
   create(
     @Request() req: Request & { user: { id: number; email: string } },
     @Body() createTaskDto: CreateTaskDto,
@@ -28,11 +42,17 @@ export class TaskController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all tasks for the current user' })
+  @ApiResponse({ status: 200, description: 'List of tasks' })
   findAll(@Request() req: Request & { user: { id: number; email: string } }) {
     return this.taskService.findAll(req.user.id);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get a specific task by ID' })
+  @ApiParam({ name: 'id', description: 'Task ID' })
+  @ApiResponse({ status: 200, description: 'Task details' })
+  @ApiResponse({ status: 404, description: 'Task not found' })
   findOne(
     @Request() req: Request & { user: { id: number; email: string } },
     @Param('id') id: string,
@@ -41,6 +61,11 @@ export class TaskController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update a task' })
+  @ApiParam({ name: 'id', description: 'Task ID' })
+  @ApiBody({ type: UpdateTaskDto })
+  @ApiResponse({ status: 200, description: 'Task updated' })
+  @ApiResponse({ status: 404, description: 'Task not found' })
   update(
     @Request() req: Request & { user: { id: number; email: string } },
     @Param('id') id: string,
@@ -50,6 +75,10 @@ export class TaskController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete a task' })
+  @ApiParam({ name: 'id', description: 'Task ID' })
+  @ApiResponse({ status: 200, description: 'Task deleted' })
+  @ApiResponse({ status: 404, description: 'Task not found' })
   remove(
     @Request() req: Request & { user: { id: number; email: string } },
     @Param('id') id: string,

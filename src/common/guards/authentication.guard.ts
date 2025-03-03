@@ -1,60 +1,42 @@
 import {
+  Injectable,
   CanActivate,
   ExecutionContext,
-  HttpException,
-  Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { errors } from '../helpers/errors';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
   constructor(
-    private readonly configService: ConfigService,
-    private readonly jwtService: JwtService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    const headers = context.switchToHttp().getRequest().headers;
-    const authorizationHeader: string = headers.authorization;
-    if (authorizationHeader) {
-      const partsAuthentication = authorizationHeader.split(' ');
-      if (partsAuthentication.length > 1) {
-        const accessToken = partsAuthentication[1];
-        try {
-          const payload = this.jwtService.verify(accessToken, {
-            secret: this.configService.get('TOKEN_KEYWORD'),
-          });
-          const response = context.switchToHttp().getResponse();
-          const request = context.switchToHttp().getRequest();
-          request.user = payload;
-          response.payload = payload;
-          return true;
-        } catch (error) {
-          if (error.name == 'TokenExpiredError') {
-            throw new HttpException(
-              errors.expiredToken.message,
-              errors.expiredToken.status,
-              { cause: errors.expiredToken.code },
-            );
-          } else {
-            throw new HttpException(
-              errors.wrongToken.message,
-              errors.wrongToken.status,
-              { cause: errors.wrongToken.code },
-            );
-          }
-        }
-      } else {
-        throw new HttpException(
-          errors.missingToken.message,
-          errors.missingToken.status,
-          { cause: errors.missingToken.code },
-        );
-      }
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const authHeader = request.headers.authorization;
+
+    if (!authHeader) {
+      throw new UnauthorizedException('Authorization header is missing');
+    }
+
+    const [bearer, token] = authHeader.split(' ');
+
+    if (bearer !== 'Bearer' || !token) {
+      throw new UnauthorizedException('Invalid authorization format');
+    }
+
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>('JWT_SECRET'),
+      });
+
+      request.user = payload;
+      return true;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
     }
   }
 }

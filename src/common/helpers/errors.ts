@@ -5,21 +5,6 @@ export const errors = {
     message: 'Internal server error',
   },
   // AUTH
-  expiredToken: {
-    code: 'TOKEN_EXPIRED',
-    status: 409,
-    message: 'Token expirado',
-  },
-  wrongToken: {
-    code: 'WRONG_TOKEN',
-    status: 401,
-    message: 'Token inválido',
-  },
-  missingToken: {
-    code: 'MISSING_TOKEN',
-    status: 401,
-    message: 'Token no encontrado',
-  },
   passwordIncorrect: {
     code: 'WRONG_PASSWORD',
     status: 401,
